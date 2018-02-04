@@ -25,11 +25,11 @@ namespace LeagueSandbox.GameServer.Logic.Packets.PacketDefinitions.S2C
                 buffer.Write((uint)HashFunctions.HashString(summonerSpells[1]));
                 buffer.Write((byte)0); // bot boolean
                 buffer.Write((int)p.Team); // Probably a short
-                buffer.fill(0, 64); // name is no longer here
-                buffer.fill(0, 64);
+                buffer.Fill(0, 64); // name is no longer here
+                buffer.Fill(0, 64);
                 foreach (var b in Encoding.Default.GetBytes(p.Rank))
                     buffer.Write((byte)b);
-                buffer.fill(0, 24 - p.Rank.Length);
+                buffer.Fill(0, 24 - p.Rank.Length);
                 buffer.Write((int)p.Icon);
                 buffer.Write((short)p.Ribbon);
             }
@@ -37,22 +37,22 @@ namespace LeagueSandbox.GameServer.Logic.Packets.PacketDefinitions.S2C
             for (var i = 0; i < 12 - players.Count; ++i)
             {
                 buffer.Write((long)-1);
-                buffer.fill(0, 173);
+                buffer.Fill(0, 173);
             }
             foreach (var b in Encoding.Default.GetBytes(version))
                 buffer.Write((byte)b);
-            buffer.fill(0, 256 - version.Length);
+            buffer.Fill(0, 256 - version.Length);
             foreach (var b in Encoding.Default.GetBytes(gameMode))
                 buffer.Write((byte)b);
-            buffer.fill(0, 128 - gameMode.Length);
+            buffer.Fill(0, 128 - gameMode.Length);
 
             foreach (var b in Encoding.Default.GetBytes("NA1"))
                 buffer.Write((byte)b);
-            buffer.fill(0, 2333); // 128 - 3 + 661 + 1546
+            buffer.Fill(0, 2333); // 128 - 3 + 661 + 1546
             buffer.Write((uint)487826); // gameFeatures (turret range indicators, etc.)
-            buffer.fill(0, 256);
+            buffer.Fill(0, 256);
             buffer.Write((uint)0);
-            buffer.fill(1, 19);
+            buffer.Fill(1, 19);
         }
     }
 }

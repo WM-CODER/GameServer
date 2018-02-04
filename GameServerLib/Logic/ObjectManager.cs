@@ -35,7 +35,9 @@ namespace LeagueSandbox.GameServer.Logic
             Teams = Enum.GetValues(typeof(TeamId)).Cast<TeamId>().ToList();
 
             foreach (var team in Teams)
+            {
                 _visionUnits.Add(team, new Dictionary<uint, AttackableUnit>());
+            }
         }
 
         public void Update(float diff)
@@ -43,23 +45,29 @@ namespace LeagueSandbox.GameServer.Logic
             var temp = GetObjects();
             foreach (var obj in temp.Values)
             {
-                if (obj.isToRemove())
+                if (obj.SetToRemove)
                 {
-                    if (obj.AttackerCount == 0)
+                    if (!(obj is ObjAIBase aiBase) || aiBase.AttackerCount == 0)
+                    {
                         RemoveObject(obj);
+                    }
+
                     continue;
                 }
 
                 obj.Update(diff);
 
-                if (!(obj is AttackableUnit))
+                if (!(obj is ObjAIBase u))
+                {
                     continue;
+                }
 
-                var u = obj as AttackableUnit;
                 foreach (var team in Teams)
                 {
                     if (u.Team == team || team == TeamId.TEAM_NEUTRAL)
+                    {
                         continue;
+                    }
 
                     var visionUnitsTeam = GetVisionUnits(u.Team);
                     if (visionUnitsTeam.ContainsKey(u.NetId))
@@ -106,10 +114,13 @@ namespace LeagueSandbox.GameServer.Logic
                     }
                 }
 
-                if (u.GetStats().GetUpdatedStats().Count > 0)
+                if (u.ReplicationManager.ChangedValues.Any(x => x != 0))
                 {
                     _game.PacketNotifier.NotifyUpdatedStats(u, false);
-                    u.GetStats().ClearUpdatedStats();
+                    for (var i = 0; i < u.ReplicationManager.ChangedValues.Length; i++)
+                    {
+                        u.ReplicationManager.ChangedValues[i] = 0;
+                    }
                 }
 
                 if (u.IsModelUpdated)
@@ -118,10 +129,10 @@ namespace LeagueSandbox.GameServer.Logic
                     u.IsModelUpdated = false;
                 }
 
-                if (obj.isMovementUpdated())
+                if (obj.IsMovementUpdated())
                 {
                     _game.PacketNotifier.NotifyMovement(obj);
-                    obj.clearMovementUpdated();
+                    obj.ClearMovementUpdated();
                 }
             }
         }
@@ -146,7 +157,7 @@ namespace LeagueSandbox.GameServer.Logic
         {
             foreach (var inhibitor in _inhibitors.Values)
             {
-                if (inhibitor.Team == team && inhibitor.getState() == InhibitorState.Alive)
+                if (inhibitor.Team == team && inhibitor.State == InhibitorState.Alive)
                 {
                     return false;
                 }

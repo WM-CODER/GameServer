@@ -28,18 +28,18 @@ namespace LeagueSandbox.GameServer.Logic.Packets.PacketDefinitions.S2C
             buffer.Write((float)m.Facing.Y); //facing y
 
             buffer.Write(Encoding.Default.GetBytes(m.Name));
-            buffer.fill(0, 64 - m.Name.Length);
+            buffer.Fill(0, 64 - m.Name.Length);
 
             buffer.Write(Encoding.Default.GetBytes(m.Model));
-            buffer.fill(0, 64 - m.Model.Length);
+            buffer.Fill(0, 64 - m.Model.Length);
 
             buffer.Write(Encoding.Default.GetBytes(m.Name));
-            buffer.fill(0, 64 - m.Name.Length);
+            buffer.Fill(0, 64 - m.Name.Length);
 
-            buffer.fill(0, 64); // empty
+            buffer.Fill(0, 64); // empty
 
             buffer.Write((int)m.Team); // Probably a short
-            buffer.fill(0, 12);
+            buffer.Fill(0, 12);
             buffer.Write((int)1); //campId 1
             buffer.Write((int)100);
             buffer.Write((int)74);
@@ -47,9 +47,9 @@ namespace LeagueSandbox.GameServer.Logic.Packets.PacketDefinitions.S2C
             buffer.Write((float)115.0066f);
             buffer.Write((byte)0);
 
-            buffer.fill(0, 11);
+            buffer.Fill(0, 11);
             buffer.Write((float)1.0f); // Unk
-            buffer.fill(0, 13);
+            buffer.Fill(0, 13);
             buffer.Write((byte)3); //type 3=champ/jungle; 2=minion
             buffer.Write((int)13337);
             buffer.Write((float)m.X); //x

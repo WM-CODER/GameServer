@@ -35,9 +35,9 @@ namespace LeagueSandbox.GameServer.Logic.Chatbox.Commands
                 var objects = _game.ObjectManager.GetObjects();
                 foreach (var o in objects)
                 {
-                    if (o.Value is Minion)
+                    if (o.Value is Minion m)
                     {
-                        (o.Value as Minion).Die(_playerManager.GetPeerInfo(peer).Champion); // :(
+                        m.Die(_playerManager.GetPeerInfo(peer).Champion); // :(
                     }
                 }
             }

@@ -38,18 +38,22 @@ namespace LeagueSandbox.GameServer
             var context = _kernel.Get<ServerContext>();
             var server = _kernel.Get<Server>();
             var itemManager = _kernel.Get<ItemManager>();
+#if !DEBUG
             var logger = _kernel.Get<Logger>();
 
             try
             {
+#endif
                 ExecutingDirectory = context.ExecutingDirectory;
                 itemManager.LoadItems();
                 server.Start();
+#if !DEBUG
             }
             catch (Exception e)
             {
                 logger.LogFatalError("Error: {0}", e.ToString());
             }
+#endif
         }
 
         public static void SetToExit()

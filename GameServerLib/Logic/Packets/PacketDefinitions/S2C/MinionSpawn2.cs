@@ -7,7 +7,7 @@ namespace LeagueSandbox.GameServer.Logic.Packets.PacketDefinitions.S2C
         public MinionSpawn2(uint netId) : base(PacketCmd.PKT_S2C_ObjectSpawn)
         {
             buffer.Write((uint)netId);
-            buffer.fill(0, 3);
+            buffer.Fill(0, 3);
         }
     }
 }

@@ -27,7 +27,7 @@ namespace LeagueSandbox.GameServer.Logic.Packets.PacketDefinitions.S2C
             for (var i = 0; i < 6 - currentBlue; ++i)
                 buffer.Write((ulong)0);
 
-            buffer.fill(0, 144);
+            buffer.Fill(0, 144);
 
             int currentPurple = 0;
             foreach (var p in players)
@@ -45,7 +45,7 @@ namespace LeagueSandbox.GameServer.Logic.Packets.PacketDefinitions.S2C
                 buffer.Write((ulong)0);
             }
 
-            buffer.fill(0, 144);
+            buffer.Fill(0, 144);
             buffer.Write(currentBlue);
             buffer.Write(currentPurple);
         }

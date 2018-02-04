@@ -1,5 +1,6 @@
 ﻿using System;
 using LeagueSandbox.GameServer.Logic.GameObjects;
+using LeagueSandbox.GameServer.Logic.GameObjects.Stats;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace LeagueSandbox.GameServerTests.Tests
@@ -11,24 +12,28 @@ namespace LeagueSandbox.GameServerTests.Tests
         public void TestStatModificator1()
         {
             //Create new stat modificator with all value to 0
-            var statModificator = new StatModifcator();
-            //Test if not modificated
-            Assert.IsFalse(statModificator.StatModified);
+            var statMod = new StatMod();
 
             //Change values
-            statModificator.BaseBonus = 1;
-            statModificator.PercentBaseBonus = 2;
-            statModificator.FlatBonus = 3;
-            statModificator.PercentBonus = 4;
+            statMod.BaseBonus = 1;
+            statMod.PercentBaseBonus = 2;
+            statMod.FlatBonus = 3;
+            statMod.PercentBonus = 4;
 
             //Test values
-            Assert.AreEqual(1, statModificator.BaseBonus);
-            Assert.AreEqual(2, statModificator.PercentBaseBonus);
-            Assert.AreEqual(3, statModificator.FlatBonus);
-            Assert.AreEqual(4, statModificator.PercentBonus);
+            Assert.AreEqual(1, statMod.BaseBonus);
+            Assert.AreEqual(2, statMod.PercentBaseBonus);
+            Assert.AreEqual(3, statMod.FlatBonus);
+            Assert.AreEqual(4, statMod.PercentBonus);
 
-            //Test if modificated
-            Assert.IsTrue(statModificator.StatModified);
+            //Create a normal stat whose base value is 0
+            var stat = new Stat(0);
+
+            //Apply the statmod to this stat
+            stat.ApplyModifier(statMod);
+
+            //Test the total value
+            Assert.AreEqual(30, stat.Total);
         }
     }
 }

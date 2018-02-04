@@ -12,7 +12,7 @@ namespace LeagueSandbox.GameServer.Logic.Packets.PacketDefinitions.S2C
             buffer.Write((long)gameId);
             foreach (var d in data)
                 buffer.Write((byte)d);
-            buffer.fill(0, 128 - data.Length);
+            buffer.Fill(0, 128 - data.Length);
         }
     }
 }

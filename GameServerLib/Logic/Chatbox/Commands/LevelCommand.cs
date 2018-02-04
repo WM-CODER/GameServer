@@ -32,10 +32,12 @@ namespace LeagueSandbox.GameServer.Logic.Chatbox.Commands
             else if (byte.TryParse(split[1], out lvl))
             {
                 if (lvl < 1 || lvl > 18)
+                {
                     return;
+                }
                 
-                var experienceToLevelUp = _game.Map.MapGameScript.ExpToLevelUp[lvl-1];
-                _playerManager.GetPeerInfo(peer).Champion.GetStats().Experience = experienceToLevelUp;
+                var experienceToLevelUp = _game.Map.MapGameScript.ExpToLevelUp[lvl - 1];
+                _playerManager.GetPeerInfo(peer).Champion.Stats.Experience = experienceToLevelUp;
             }
         }
     }

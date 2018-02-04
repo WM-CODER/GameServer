@@ -16,7 +16,7 @@ namespace LeagueSandbox.GameServer.Logic.Packets.PacketDefinitions.S2C
             : base(PacketCmd.PKT_S2C_LevelPropAnimation)
         {
             buffer.Write(Encoding.Default.GetBytes(animationName));
-            buffer.fill(0, 64 - animationName.Length);
+            buffer.Fill(0, 64 - animationName.Length);
 
             buffer.Write((float)unk1);
             buffer.Write((float)animationTime);

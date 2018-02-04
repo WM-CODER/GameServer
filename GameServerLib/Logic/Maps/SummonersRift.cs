@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using LeagueSandbox.GameServer.Logic.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.Logic.GameObjects.Stats;
 
 namespace LeagueSandbox.GameServer.Logic.Maps
 {
@@ -453,47 +454,43 @@ namespace LeagueSandbox.GameServer.Logic.Maps
         public void SetMinionStats(Minion m)
         {
             // Same for all minions
-            m.GetStats().MoveSpeed.BaseValue = 325.0f;
+            m.MovementSpeed = new Stat(325, 0);
 
             switch (m.getType())
             {
                 case MinionSpawnType.MINION_TYPE_MELEE:
-                    m.GetStats().CurrentHealth = 475.0f + 20.0f * (int)(_game.GameTime / (float)(180 * 1000));
-                    m.GetStats().HealthPoints.BaseValue = 475.0f + 20.0f * (int)(_game.GameTime / (float)(180 * 1000));
-                    m.GetStats().AttackDamage.BaseValue = 12.0f + 1.0f * (int)(_game.GameTime / (float)(180 * 1000));
-                    m.GetStats().Range.BaseValue = 180.0f;
-                    m.GetStats().AttackSpeedFlat = 1.250f;
-                    m.AutoAttackDelay = 11.8f / 30.0f;
+                    m.HealthPoints = new Health(475 + 20 * (int)(_game.GameTime / (180 * 1000)));
+                    m.AttackDamage = new Stat(12 + 1 * (int)(_game.GameTime / (180 * 1000)), 0);
+                    m.AttackRange = new Stat(180, 0);
+                    m.AttackSpeed = new Stat(1.25f, 0.2f, 2.5f);
+                    m.AutoAttackDelay = 11.8f / 30;
                     m.IsMelee = true;
                     break;
                 case MinionSpawnType.MINION_TYPE_CASTER:
-                    m.GetStats().CurrentHealth = 279.0f + 7.5f * (int)(_game.GameTime / (float)(90 * 1000));
-                    m.GetStats().HealthPoints.BaseValue = 279.0f + 7.5f * (int)(_game.GameTime / (float)(90 * 1000));
-                    m.GetStats().AttackDamage.BaseValue = 23.0f + 1.0f * (int)(_game.GameTime / (float)(90 * 1000));
-                    m.GetStats().Range.BaseValue = 600.0f;
-                    m.GetStats().AttackSpeedFlat = 0.670f;
-                    m.AutoAttackDelay = 14.1f / 30.0f;
-                    m.AutoAttackProjectileSpeed = 650.0f;
+                    m.HealthPoints = new Health(279 + 7.5f * (int)(_game.GameTime / (90 * 1000)));
+                    m.AttackDamage = new Stat(23 + 1 * (int)(_game.GameTime / (90 * 1000)), 0);
+                    m.AttackRange = new Stat(600, 0);
+                    m.AttackSpeed = new Stat(0.67f, 0.2f, 2.5f);
+                    m.AutoAttackDelay = 14.1f / 30;
+                    m.AutoAttackProjectileSpeed = 650;
                     break;
                 case MinionSpawnType.MINION_TYPE_CANNON:
-                    m.GetStats().CurrentHealth = 700.0f + 27.0f * (int)(_game.GameTime / (float)(180 * 1000));
-                    m.GetStats().HealthPoints.BaseValue = 700.0f + 27.0f * (int)(_game.GameTime / (float)(180 * 1000));
-                    m.GetStats().AttackDamage.BaseValue = 40.0f + 3.0f * (int)(_game.GameTime / (float)(180 * 1000));
-                    m.GetStats().Range.BaseValue = 450.0f;
-                    m.GetStats().AttackSpeedFlat = 1.0f;
-                    m.AutoAttackDelay = 9.0f / 30.0f;
-                    m.AutoAttackProjectileSpeed = 1200.0f;
+                    m.HealthPoints = new Health(700 + 27 * (int)(_game.GameTime / (180 * 1000)));
+                    m.AttackDamage = new Stat(40 + 3 * (int)(_game.GameTime / (180 * 1000)), 0);
+                    m.AttackRange = new Stat(450, 0);
+                    m.AttackSpeed = new Stat(1, 0.2f, 2.5f);
+                    m.AutoAttackDelay = 9 / 30f;
+                    m.AutoAttackProjectileSpeed = 1200;
                     break;
                 case MinionSpawnType.MINION_TYPE_SUPER:
-                    m.GetStats().CurrentHealth = 1500.0f + 200.0f * (int)(_game.GameTime / (float)(180 * 1000));
-                    m.GetStats().HealthPoints.BaseValue = 1500.0f + 200.0f * (int)(_game.GameTime / (float)(180 * 1000));
-                    m.GetStats().AttackDamage.BaseValue = 190.0f + 10.0f * (int)(_game.GameTime / (float)(180 * 1000));
-                    m.GetStats().Range.BaseValue = 170.0f;
-                    m.GetStats().AttackSpeedFlat = 0.694f;
-                    m.GetStats().Armor.BaseValue = 30.0f;
-                    m.GetStats().MagicResist.BaseValue = -30.0f;
+                    m.HealthPoints = new Health(1500 + 200 * (int)(_game.GameTime / (180 * 1000)));
+                    m.AttackDamage = new Stat(190 + 10 * (int)(_game.GameTime / (180 * 1000)), 0);
+                    m.AttackRange = new Stat(170, 0);
+                    m.AttackSpeed = new Stat(0.694f, 0.2f, 2.5f);
+                    m.Armor = new Stat(30);
+                    m.MagicResist = new Stat(-30);
                     m.IsMelee = true;
-                    m.AutoAttackDelay = 15.0f / 30.0f;
+                    m.AutoAttackDelay = 15 / 30f;
                     break;
             }
         }
@@ -552,7 +549,7 @@ namespace LeagueSandbox.GameServer.Logic.Maps
                 var waypoints = spawnToWaypoints[pos].Item1;
                 var inhibitorId = spawnToWaypoints[pos].Item2;
                 var inhibitor = _game.ObjectManager.GetInhibitorById(inhibitorId);
-                var isInhibitorDead = inhibitor.getState() == InhibitorState.Dead && !inhibitor.RespawnAnnounced;
+                var isInhibitorDead = inhibitor.State == InhibitorState.Dead && !inhibitor.RespawnAnnounced;
 
                 var oppositeTeam = TeamId.TEAM_BLUE;
                 if (inhibitor.Team == TeamId.TEAM_PURPLE)

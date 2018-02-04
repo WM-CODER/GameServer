@@ -29,19 +29,19 @@ namespace LeagueSandbox.GameServer.Logic.Packets.PacketDefinitions.S2C
             buffer.Write((float)m.Facing.Y); //facing y
 
             buffer.Write(Encoding.Default.GetBytes(m.Name));
-            buffer.fill(0, 64 - m.Name.Length);
+            buffer.Fill(0, 64 - m.Name.Length);
 
             buffer.Write(Encoding.Default.GetBytes(m.Model));
-            buffer.fill(0, 64 - m.Model.Length);
+            buffer.Fill(0, 64 - m.Model.Length);
 
             buffer.Write(Encoding.Default.GetBytes(m.Name));
-            buffer.fill(0, 64 - m.Name.Length);
+            buffer.Fill(0, 64 - m.Name.Length);
 
             buffer.Write(Encoding.Default.GetBytes(m.SpawnAnimation));
-            buffer.fill(0, 64 - m.SpawnAnimation.Length);
+            buffer.Fill(0, 64 - m.SpawnAnimation.Length);
 
             buffer.Write((int)m.Team); // Probably a short
-            buffer.fill(0, 12); // Unk
+            buffer.Fill(0, 12); // Unk
             buffer.Write((int)m.CampId); // Camp id. Camp needs to exist
             buffer.Write((int)0); // Unk
             buffer.Write((int)m.CampUnk);
@@ -49,9 +49,9 @@ namespace LeagueSandbox.GameServer.Logic.Packets.PacketDefinitions.S2C
             buffer.Write((float)m.SpawnAnimationTime); // After this many seconds, the camp icon appears in the minimap
             buffer.Write((float)1191.533936f); // Unk
             buffer.Write((int)1); // Unk
-            buffer.fill(0, 40); // Unk
+            buffer.Fill(0, 40); // Unk
             buffer.Write((float)1.0f); // Unk
-            buffer.fill(0, 13); // Unk
+            buffer.Fill(0, 13); // Unk
             buffer.Write((byte)3); //type 3=champ/jungle; 2=minion
             buffer.Write((byte)0xF1); //<-|
             buffer.Write((byte)0xFB); //  |-> Unk

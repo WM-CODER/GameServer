@@ -13,12 +13,12 @@ namespace LeagueSandbox.GameServer.Logic.Packets.PacketDefinitions.S2C
             buffer.Write(unit.NetId);
             buffer.Write((byte)unk1);
             buffer.Write(Encoding.Default.GetBytes(iconName)); // This is probably the icon name, but sometimes it's empty
-            buffer.fill(0, 64 - iconName.Length);              // Example: "Quest"
+            buffer.Fill(0, 64 - iconName.Length);              // Example: "Quest"
             buffer.Write((byte)unk2);
             buffer.Write(Encoding.Default.GetBytes(unk3));
-            buffer.fill(0, 64 - unk3.Length); // Example: "Recall"
+            buffer.Fill(0, 64 - unk3.Length); // Example: "Recall"
             buffer.Write(Encoding.Default.GetBytes(unk4));
-            buffer.fill(0, 64 - unk4.Length); // Example "OdinRecall", "odinrecallimproved"
+            buffer.Fill(0, 64 - unk4.Length); // Example "OdinRecall", "odinrecallimproved"
         }
     }
 }

@@ -9,59 +9,63 @@ namespace LeagueSandbox.GameServer.Logic.Packets.PacketDefinitions.S2C
 {
     public class UpdateStats : BasePacket
     {
-        public UpdateStats(AttackableUnit u, bool partial = true)
+        public UpdateStats(ObjAIBase u, bool partial = true)
             : base(PacketCmd.PKT_S2C_CharStats)
         {
-            var stats = new Dictionary<MasterMask, Dictionary<FieldMask, float>>();
-
+            var stats = new uint?[6, 32];
             if (partial)
-                stats = u.GetStats().GetUpdatedStats();
+            {
+                stats = u.ReplicationManager.GetUpdatedStats();
+            }
             else
-                stats = u.GetStats().GetAllStats();
-            var orderedStats = stats.OrderBy(x => x.Key);
+            {
+                stats = u.ReplicationManager.Values;
+            }
 
             buffer.Write(Environment.TickCount); // syncID
             buffer.Write((byte)1); // updating 1 unit
 
             byte masterMask = 0;
-            foreach (var p in orderedStats)
-                masterMask |= (byte)p.Key;
+
+            for (var i = 0; i < 6; i++)
+            {
+                for (var j = 0; j < 32; j++)
+                {
+                    if (stats[i, j] != null)
+                    {
+                        masterMask |= (byte)(1 << i);
+                        break;
+                    }
+                }
+            }
 
             buffer.Write((byte)masterMask);
             buffer.Write((uint)u.NetId);
 
-            foreach (var group in orderedStats)
+            for (var i = 0; i < 6; i++)
             {
-                var orderedGroup = group.Value.OrderBy(x => x.Key);
                 uint fieldMask = 0;
                 byte size = 0;
-                foreach (var stat in orderedGroup)
+                for (var j = 0; j < 32; j++)
                 {
-                    fieldMask |= (uint)stat.Key;
-                    size += u.GetStats().getSize(group.Key, stat.Key);
+                    if (stats[i, j] != null)
+                    {
+                        fieldMask |= 1u << j;
+                        size += 4;
+                    }
                 }
                 buffer.Write((uint)fieldMask);
                 buffer.Write((byte)size);
-                foreach (var stat in orderedGroup)
+                for (var j = 0; j < 32; j++)
                 {
-                    size = u.GetStats().getSize(group.Key, stat.Key);
-                    switch (size)
+                    if (stats[i, j] != null)
                     {
-                        case 1:
-                            buffer.Write((byte)Convert.ToByte(stat.Value));
-                            break;
-                        case 2:
-                            buffer.Write((short)Convert.ToInt16(stat.Value));
-                            break;
-                        case 4:
-                            var bytes = BitConverter.GetBytes(stat.Value);
-                            if (bytes[0] >= 0xFE)
-                                bytes[0] = 0xFD;
-                            buffer.Write((float)BitConverter.ToSingle(bytes, 0));
-                            break;
+                        buffer.Write((uint)stats[i, j]);
                     }
                 }
             }
+
+            u.ReplicationManager.ResetChanged();
         }
     }
 }

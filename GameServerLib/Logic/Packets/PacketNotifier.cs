@@ -62,7 +62,7 @@ namespace LeagueSandbox.GameServer.Logic.Packets
             Program.SetToExit();
         }
 
-        public void NotifyUpdatedStats(AttackableUnit u, bool partial = true)
+        public void NotifyUpdatedStats(ObjAIBase u, bool partial = true)
         {
             var us = new UpdateStats(u, partial);
             var channel = Channel.CHL_LOW_PRIORITY;
@@ -79,7 +79,7 @@ namespace LeagueSandbox.GameServer.Logic.Packets
         public void NotifyInhibitorState(Inhibitor inhibitor, GameObject killer = null, List<Champion> assists = null)
         {
             UnitAnnounce announce;
-            switch (inhibitor.getState())
+            switch (inhibitor.State)
             {
                 case InhibitorState.Dead:
                     announce = new UnitAnnounce(UnitAnnounces.InhibitorDestroyed, inhibitor, killer, assists);
@@ -131,7 +131,7 @@ namespace LeagueSandbox.GameServer.Logic.Packets
             }
             else
             {
-                u.setPosition(_x, _y);
+                u.SetPosition(_x, _y);
 
                 //TeleportRequest first(u.NetId, u.teleportToX, u.teleportToY, true);
                 //sendPacket(currentPeer, first, Channel.CHL_S2C);

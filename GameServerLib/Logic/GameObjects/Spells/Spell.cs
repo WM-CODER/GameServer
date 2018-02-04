@@ -85,12 +85,12 @@ namespace LeagueSandbox.GameServer.Logic.GameObjects
         {
             if (HasEmptyScript) return false;
 
-            var stats = Owner.GetStats();
-            if ((SpellData.ManaCost[Level] * (1 - stats.getSpellCostReduction())) >= stats.CurrentMana || 
+            var stats = Owner.Stats;
+            if (SpellData.ManaCost[Level] * (1 - stats.PercentSpellCostReduction) >= Owner.ManaPoints.Current || 
                 state != SpellState.STATE_READY)
                 return false;
 
-            stats.CurrentMana = stats.CurrentMana - SpellData.ManaCost[Level] * (1 - stats.getSpellCostReduction());
+            Owner.ManaPoints.Current -= SpellData.ManaCost[Level] * (1 - stats.PercentSpellCostReduction);
             X = x;
             Y = y;
             X2 = x2;
@@ -108,7 +108,7 @@ namespace LeagueSandbox.GameServer.Logic.GameObjects
 
             if (SpellData.GetCastTime() > 0 && (SpellData.Flags & (int)SpellFlag.SPELL_FLAG_InstantCast) == 0)
             {
-                Owner.setPosition(Owner.X, Owner.Y);//stop moving serverside too. TODO: check for each spell if they stop movement or not
+                Owner.SetPosition(Owner.X, Owner.Y); //stop moving serverside too. TODO: check for each spell if they stop movement or not
                 state = SpellState.STATE_CASTING;
                 CurrentCastTime = SpellData.GetCastTime();
             }
@@ -314,13 +314,13 @@ namespace LeagueSandbox.GameServer.Logic.GameObjects
 
         public virtual void levelUp()
         {
-            if (Level <= 5)
+            if (Level < 5)
             {
                 ++Level;
             }
             if (Slot < 4)
             {
-                Owner.GetStats().ManaCost[Slot] = SpellData.ManaCost[Level];
+                Owner.Stats.SetBaseManaCost(Slot, SpellData.ManaCost[Level]);
             }
         }
 

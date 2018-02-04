@@ -11,7 +11,7 @@ namespace LeagueSandbox.GameServer.Logic.Packets.PacketDefinitions.S2C
             : base(PacketCmd.PKT_S2C_FloatingText, u.NetId)
         {
             buffer.Write((int)0); // netid?
-            buffer.fill(0, 10);
+            buffer.Fill(0, 10);
             buffer.Write((int)0); // netid?
             buffer.Write(Encoding.Default.GetBytes(text));
             buffer.Write((byte)0x00);

@@ -14,9 +14,9 @@ namespace LeagueSandbox.GameServer.Logic.Packets.PacketDefinitions.S2C
         public EnterVisionAgain(Minion m) 
             : base(PacketCmd.PKT_S2C_ObjectSpawn, m.NetId)
         {
-            buffer.fill(0, 13);
+            buffer.Fill(0, 13);
             buffer.Write(1.0f);
-            buffer.fill(0, 13);
+            buffer.Fill(0, 13);
             buffer.Write((byte)0x02);
             buffer.Write((int)Environment.TickCount); // unk
 
@@ -57,9 +57,9 @@ namespace LeagueSandbox.GameServer.Logic.Packets.PacketDefinitions.S2C
             }
             */
 
-            buffer.fill(0, 10);
+            buffer.Fill(0, 10);
             buffer.Write((float)1.0f);
-            buffer.fill(0, 13);
+            buffer.Fill(0, 13);
 
             buffer.Write((byte)2); // Type of data: Waypoints=2
             buffer.Write((int)Environment.TickCount); // unk

@@ -4,10 +4,9 @@ using System.Collections.Generic;
 using System.Numerics;
 using LeagueSandbox.GameServer.Logic.Content;
 using LeagueSandbox.GameServer.Logic.Enet;
-using Newtonsoft.Json.Linq;
-using LeagueSandbox.GameServer.Logic.Scripting;
 using LeagueSandbox.GameServer.Logic.API;
 using LeagueSandbox.GameServer.Logic.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.Logic.GameObjects.Stats;
 
 namespace LeagueSandbox.GameServer.Logic.GameObjects
 {
@@ -18,6 +17,8 @@ namespace LeagueSandbox.GameServer.Logic.GameObjects
         public float ChampionGoldFromMinions { get; set; }
         public RuneCollection RuneList { get; set; }
         public Dictionary<short, Spell> Spells { get; private set; } = new Dictionary<short, Spell>();
+        public float GoldPerSecond { get; set; }
+        public bool IsGeneratingGold { get; set; }
 
         private short _skillPoints;
         public int Skin { get; set; }
@@ -32,6 +33,7 @@ namespace LeagueSandbox.GameServer.Logic.GameObjects
         /// </summary>
         private uint _playerTeamSpecialId;
         private uint _playerHitId;
+        public HeroStats Stats;
 
         public Champion(string model,
                         uint playerId,
@@ -39,7 +41,7 @@ namespace LeagueSandbox.GameServer.Logic.GameObjects
                         RuneCollection runeList,
                         ClientInfo clientInfo,
                         uint netId = 0)
-            : base(model, new Stats(), 30, 0, 0, 1200, netId)
+            : base(model, 30, 0, 0, 1200, netId)
         {
             _playerId = playerId;
             _playerTeamSpecialId = playerTeamSpecialId;
@@ -48,25 +50,29 @@ namespace LeagueSandbox.GameServer.Logic.GameObjects
             Inventory = InventoryManager.CreateInventory(this);
             Shop = Shop.CreateShop(this);
 
-            _stats.Gold = 475.0f;
-            _stats.GoldPerSecond.BaseValue = _game.Map.MapGameScript.GoldPerSecond;
-            _stats.SetGeneratingGold(false);
+            Stats = new HeroStats(this, CharData);
+            HealthPoints = new Health(CharData.BaseHP);
+            ManaPoints = new Health(CharData.BaseMP);
+            Stats.Gold += 475.0f;
+            Stats.TotalGold += 475.0f;
+            GoldPerSecond = _game.Map.MapGameScript.GoldPerSecond;
+            IsGeneratingGold = false;
 
             //TODO: automaticaly rise spell levels with CharData.SpellLevelsUp
-            for(short i = 0; i<CharData.SpellNames.Length;i++)
+            for (short i = 0; i < CharData.SpellNames.Length;i++)
             {
-                if(CharData.SpellNames[i] != "")
+                if (CharData.SpellNames[i] != "")
                 {
-                    Spells[i] = new Spell(this, CharData.SpellNames[i], (byte)(i));
+                    Spells[i] = new Spell(this, CharData.SpellNames[i], (byte)i);
                 }
             }
             Spells[4] = new Spell(this, clientInfo.SummonerSkills[0], 4);
             Spells[5] = new Spell(this, clientInfo.SummonerSkills[1], 5);
             Spells[13] = new Spell(this, "Recall", 13);
 
-            for(short i = 0; i<CharData.Passives.Length; i++)
+            for (short i = 0; i < CharData.Passives.Length; i++)
             {
-                if (CharData.Passives[i].PassiveLuaName != "")
+                if (!string.IsNullOrEmpty(CharData.Passives[i].PassiveLuaName))
                 {
                     Spells[(byte)(i + 14)] = new Spell(this, CharData.Passives[i].PassiveLuaName, (byte)(i + 14));
                 }
@@ -74,16 +80,18 @@ namespace LeagueSandbox.GameServer.Logic.GameObjects
 
             for (short i = 0; i < CharData.ExtraSpells.Length; i++)
             {
-                if (CharData.ExtraSpells[i] != "")
+                if (!string.IsNullOrEmpty(CharData.ExtraSpells[i]))
                 {
                     var spell = new Spell(this, CharData.ExtraSpells[i], (byte)(i + 45));
                     Spells[(byte)(i + 45)] = spell;
                     spell.levelUp();
                 }
             }
+
             Spells[4].levelUp();
             Spells[5].levelUp();
         }
+
         private string GetPlayerIndex()
         {
             return $"player{_playerId}";
@@ -134,33 +142,105 @@ namespace LeagueSandbox.GameServer.Logic.GameObjects
             return 0;
         }
 
-        public void AddStatModifier(ChampionStatModifier statModifier)
+        public override void UpdateReplication()
         {
-            _stats.AddModifier(statModifier);
-        }
-
-        public void UpdateStatModifier(ChampionStatModifier statModifier)
-        {
-            _stats.UpdateModifier(statModifier);
-        }
-
-        public void RemoveStatModifier(ChampionStatModifier statModifier)
-        {
-            _stats.RemoveModifier(statModifier);
+            ReplicationManager.Update(Stats.Gold, 0, 0);
+            ReplicationManager.Update(Stats.TotalGold, 0, 1);
+            ReplicationManager.Update(Stats.SpellEnabledBitFieldLower1, 0, 2);
+            ReplicationManager.Update(Stats.SpellEnabledBitFieldUpper1, 0, 3);
+            ReplicationManager.Update(Stats.SpellEnabledBitFieldLower2, 0, 4);
+            ReplicationManager.Update(Stats.SpellEnabledBitFieldUpper2, 0, 5);
+            ReplicationManager.Update(Stats.EvolvePoints, 0, 6);
+            ReplicationManager.Update(Stats.EvolveFlags, 0, 7);
+            ReplicationManager.Update(Stats.ManaCost0, 0, 8);
+            ReplicationManager.Update(Stats.ManaCost1, 0, 9);
+            ReplicationManager.Update(Stats.ManaCost2, 0, 10);
+            ReplicationManager.Update(Stats.ManaCost3, 0, 11);
+            ReplicationManager.Update(Stats.ManaCostEx0, 0, 12);
+            ReplicationManager.Update(Stats.ManaCostEx1, 0, 13);
+            ReplicationManager.Update(Stats.ManaCostEx2, 0, 14);
+            ReplicationManager.Update(Stats.ManaCostEx3, 0, 15);
+            ReplicationManager.Update(Stats.ManaCostEx4, 0, 16);
+            ReplicationManager.Update(Stats.ManaCostEx5, 0, 17);
+            ReplicationManager.Update(Stats.ManaCostEx6, 0, 18);
+            ReplicationManager.Update(Stats.ManaCostEx7, 0, 19);
+            ReplicationManager.Update(Stats.ManaCostEx8, 0, 20);
+            ReplicationManager.Update(Stats.ManaCostEx9, 0, 21);
+            ReplicationManager.Update(Stats.ManaCostEx10, 0, 22);
+            ReplicationManager.Update(Stats.ManaCostEx11, 0, 23);
+            ReplicationManager.Update(Stats.ManaCostEx12, 0, 24);
+            ReplicationManager.Update(Stats.ManaCostEx13, 0, 25);
+            ReplicationManager.Update(Stats.ManaCostEx14, 0, 26);
+            ReplicationManager.Update(Stats.ManaCostEx15, 0, 27);
+            ReplicationManager.Update((uint)Stats.ActionState, 1, 0);
+            ReplicationManager.Update(Stats.IsMagicImmune, 1, 1);
+            ReplicationManager.Update(Stats.IsInvulnerable, 1, 2);
+            ReplicationManager.Update(Stats.IsPhysicalImmune, 1, 3);
+            ReplicationManager.Update(Stats.IsLifestealImmune, 1, 4);
+            ReplicationManager.Update(Stats.BaseAttackDamage, 1, 5);
+            ReplicationManager.Update(Stats.BaseAbilityPower, 1, 6);
+            ReplicationManager.Update(Stats.TotalDodgeChance, 1, 7);
+            ReplicationManager.Update(Stats.TotalCriticalChance, 1, 8);
+            ReplicationManager.Update(Stats.TotalArmor, 1, 9);
+            ReplicationManager.Update(Stats.SpellBlock, 1, 10);
+            ReplicationManager.Update(Stats.HealthRegenPer5, 1, 11);
+            ReplicationManager.Update(Stats.ManaRegenPer5, 1, 12);
+            ReplicationManager.Update(Stats.TotalAttackRange, 1, 13);
+            ReplicationManager.Update(Stats.FlatAttackDamageMod, 1, 14);
+            ReplicationManager.Update(Stats.PercentAttackDamageMod, 1, 15);
+            ReplicationManager.Update(Stats.FlatMagicalDamageMod, 1, 16);
+            ReplicationManager.Update(Stats.PercentMagicalDamageMod, 1, 17);
+            ReplicationManager.Update(Stats.FlatMagicalReduction, 1, 18);
+            ReplicationManager.Update(Stats.PercentMagicalReduction, 1, 19);
+            ReplicationManager.Update(Stats.AttackSpeedMod, 1, 20);
+            ReplicationManager.Update(Stats.FlatAttackRangeMod, 1, 21);
+            ReplicationManager.Update(Stats.PercentCdrMod, 1, 22);
+            ReplicationManager.Update(Stats.PassiveCooldownEndTime, 1, 23);
+            ReplicationManager.Update(Stats.PassiveCooldownTotalTime, 1, 24);
+            ReplicationManager.Update(Stats.FlatArmorPenetration, 1, 25);
+            ReplicationManager.Update(Stats.PercentArmorPenetration, 1, 26);
+            ReplicationManager.Update(Stats.FlatMagicPenetration, 1, 27);
+            ReplicationManager.Update(Stats.PercentMagicPenetration, 1, 28);
+            ReplicationManager.Update(Stats.PercentLifeStealMod, 1, 29);
+            ReplicationManager.Update(Stats.PercentSpellVampMod, 1, 30);
+            ReplicationManager.Update(Stats.PercentTenacity, 1, 31);
+            ReplicationManager.Update(Stats.PercentBonusArmorPenetration, 2, 0);
+            ReplicationManager.Update(Stats.PercentBonusMagicPenetration, 2, 1);
+            ReplicationManager.Update(Stats.BaseHealthRegenRate, 2, 2);
+            ReplicationManager.Update(Stats.BaseManaRegenRate, 2, 3);
+            ReplicationManager.Update(Stats.CurrentHealth, 3, 0);
+            ReplicationManager.Update(Stats.CurrentMana, 3, 1);
+            ReplicationManager.Update(Stats.MaxHealth, 3, 2);
+            ReplicationManager.Update(Stats.MaxMana, 3, 3);
+            ReplicationManager.Update(Stats.Experience, 3, 4);
+            ReplicationManager.Update(Stats.LifeTime, 3, 5);
+            ReplicationManager.Update(Stats.MaxLifeTime, 3, 6);
+            ReplicationManager.Update(Stats.LifeTimeTicks, 3, 7);
+            ReplicationManager.Update(Stats.FlatVisionRangeMod, 3, 8);
+            ReplicationManager.Update(Stats.PercentVisionRangeMod, 3, 9);
+            ReplicationManager.Update(Stats.TotalMovementSpeed, 3, 10);
+            ReplicationManager.Update(Stats.TotalSize, 3, 11);
+            ReplicationManager.Update(Stats.PathfindingRadiusMod, 3, 12);
+            ReplicationManager.Update(Stats.Level, 3, 13);
+            ReplicationManager.Update(Stats.NumberOfNeutralMinionsKilled, 3, 14);
+            ReplicationManager.Update(Stats.IsTargetable, 3, 15);
+            ReplicationManager.Update((uint)Stats.IsTargetableToTeamFlags, 3, 16);
         }
         public bool CanMove()
         {
-            return !this.HasCrowdControl(CrowdControlType.Stun) &&
-                !this.IsDashing &&
-                !this.IsCastingSpell &&
-                !this.IsDead &&
-                !this.HasCrowdControl(CrowdControlType.Root);
+            return !HasCrowdControl(CrowdControlType.Stun) &&
+                !IsDashing &&
+                !IsCastingSpell &&
+                !IsDead &&
+                !HasCrowdControl(CrowdControlType.Root);
         }
+
         public bool CanCast()
         {
-            return !this.HasCrowdControl(CrowdControlType.Stun) &&
-                !this.HasCrowdControl(CrowdControlType.Silence);
+            return !HasCrowdControl(CrowdControlType.Stun) &&
+                !HasCrowdControl(CrowdControlType.Silence);
         }
+
         public Vector2 GetSpawnPosition()
         {
             var config = _game.Config;
@@ -168,8 +248,10 @@ namespace LeagueSandbox.GameServer.Logic.GameObjects
             var playerTeam = "";
             var teamSize = GetTeamSize();
 
-            if (teamSize > 6) //???
+            if (teamSize > 6) // ???
+            {
                 teamSize = 6;
+            }
 
             if (config.Players.ContainsKey(playerIndex))
             {
@@ -246,7 +328,7 @@ namespace LeagueSandbox.GameServer.Logic.GameObjects
                 var objects = _game.ObjectManager.GetObjects();
                 var distanceToTarget = 9000000.0f;
                 AttackableUnit nextTarget = null;
-                var range = Math.Max(_stats.Range.Total, DETECT_RANGE);
+                var range = Math.Max(Stats.TotalAttackRange, DETECT_RANGE);
 
                 foreach (var it in objects)
                 {
@@ -269,9 +351,9 @@ namespace LeagueSandbox.GameServer.Logic.GameObjects
                 }
             }
 
-            if (!_stats.IsGeneratingGold() && _game.GameTime >= _game.Map.MapGameScript.FirstGoldTime)
+            if (!IsGeneratingGold && _game.GameTime >= _game.Map.MapGameScript.FirstGoldTime)
             {
-                _stats.SetGeneratingGold(true);
+                IsGeneratingGold = true;
                 _logger.LogCoreInfo("Generating Gold!");
             }
 
@@ -307,10 +389,10 @@ namespace LeagueSandbox.GameServer.Logic.GameObjects
         public void Respawn()
         {
             var spawnPos = GetRespawnPosition();
-            setPosition(spawnPos.X, spawnPos.Y);
+            SetPosition(spawnPos.X, spawnPos.Y);
             _game.PacketNotifier.NotifyChampionRespawn(this);
-            GetStats().CurrentHealth = GetStats().HealthPoints.Total;
-            GetStats().CurrentMana = GetStats().HealthPoints.Total;
+            HealthPoints.Current = HealthPoints.Total;
+            ManaPoints.Current = ManaPoints.Total;
             IsDead = false;
             RespawnTimer = -1;
         }
@@ -364,19 +446,33 @@ namespace LeagueSandbox.GameServer.Logic.GameObjects
 
         public bool LevelUp()
         {
-            var stats = GetStats();
             var expMap = _game.Map.MapGameScript.ExpToLevelUp;
-            if (stats.GetLevel() >= expMap.Count)
-                return false;
-            if (stats.Experience < expMap[stats.Level])
-                return false;
-
-            while (stats.Level < expMap.Count && stats.Experience >= expMap[stats.Level])
+            if (Stats.Level >= expMap.Count)
             {
-                GetStats().LevelUp();
-                _logger.LogCoreInfo("Champion " + Model + " leveled up to " + stats.Level);
+                return false;
+            }
+
+            if (Stats.Experience < expMap[(int)Stats.Level])
+            {
+                return false;
+            }
+
+            while (Stats.Level < expMap.Count && Stats.Experience >= expMap[(int)Stats.Level])
+            {
+                Stats.Level++;
+
+                HealthPoints.BaseBonus += Stats.HealthPerLevel;
+                ManaPoints.BaseBonus += Stats.ManaPerLevel;
+                AttackDamage.BaseBonus += Stats.AttackDamagePerLevel;
+                Armor.BaseBonus += Stats.ArmorPerLevel;
+                MagicResist.BaseBonus += Stats.MagicResistPerLevel;
+                HealthRegeneration.BaseBonus += Stats.HealthRegenerationPerLevel;
+                ManaRegeneration.BaseBonus += Stats.ManaRegenerationPerLevel;
+
+                _logger.LogCoreInfo("Champion " + Model + " leveled up to " + Stats.Level);
                 _skillPoints++;
             }
+
             return true;
         }
 
@@ -387,7 +483,7 @@ namespace LeagueSandbox.GameServer.Logic.GameObjects
 
         public override void Die(AttackableUnit killer)
         {
-            RespawnTimer = 5000 + GetStats().Level * 2500;
+            RespawnTimer = 5000 + Stats.Level * 2500;
             _game.ObjectManager.StopTargeting(this);
 
             _game.PacketNotifier.NotifyUnitAnnounceEvent(UnitAnnounces.Death, this, killer);
@@ -449,7 +545,8 @@ namespace LeagueSandbox.GameServer.Logic.GameObjects
 
             _game.PacketNotifier.NotifyChampionDie(this, cKiller, (int)gold);
 
-            cKiller.GetStats().Gold = cKiller.GetStats().Gold + gold;
+            cKiller.Stats.Gold += gold;
+            cKiller.Stats.TotalGold += gold;
             _game.PacketNotifier.NotifyAddGold(cKiller, this, gold);
 
             //CORE_INFO("After: getGoldFromChamp: %f Killer: %i Victim: %i", gold, cKiller.killDeathCounter,this.killDeathCounter);
@@ -470,7 +567,8 @@ namespace LeagueSandbox.GameServer.Logic.GameObjects
             }
         }
 
-        public override void TakeDamage(AttackableUnit attacker, float damage, DamageType type, DamageSource source, bool isCrit)
+        public override void TakeDamage(ObjAIBase attacker, float damage, DamageType type, DamageSource source,
+            bool isCrit)
         {
             base.TakeDamage(attacker, damage, type, source, isCrit);
 

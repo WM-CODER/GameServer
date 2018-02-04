@@ -28,7 +28,7 @@ namespace LeagueSandbox.GameServer.Logic.GameObjects
             byte campUnk = 0x2A,
             float spawnAnimationTime = 0.0f,
             uint netId = 0
-        ) : base(model, new Stats(), 40, x, y, 0, netId)
+        ) : base(model, 40, x, y, 0, netId)
         {
             SetTeam(TeamId.TEAM_NEUTRAL);
 

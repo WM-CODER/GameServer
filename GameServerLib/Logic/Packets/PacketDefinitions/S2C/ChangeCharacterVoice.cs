@@ -12,7 +12,7 @@ namespace LeagueSandbox.GameServer.Logic.Packets.PacketDefinitions.S2C
             foreach (var b in Encoding.Default.GetBytes(voiceOverride))
                 buffer.Write((byte)b);
             if (voiceOverride.Length < 32)
-                buffer.fill(0, 32 - voiceOverride.Length);
+                buffer.Fill(0, 32 - voiceOverride.Length);
         }
     }
 }

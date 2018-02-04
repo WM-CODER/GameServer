@@ -15,13 +15,13 @@ namespace LeagueSandbox.GameServer.Logic.Packets.PacketDefinitions.S2C
         {
             foreach (var b in Encoding.Default.GetBytes(text))
                 buffer.Write(b);
-            buffer.fill(0, 128 - text.Length);
+            buffer.Fill(0, 128 - text.Length);
             foreach (var b in Encoding.Default.GetBytes(title))
                 buffer.Write(b);
-            buffer.fill(0, 128 - title.Length);
+            buffer.Fill(0, 128 - title.Length);
             foreach (var b in Encoding.Default.GetBytes(imagePath))
                 buffer.Write(b);
-            buffer.fill(0, 128 - imagePath.Length);
+            buffer.Fill(0, 128 - imagePath.Length);
             buffer.Write((byte)tipCommand); /* ACTIVATE_TIP     = 0
                                                REMOVE_TIP       = 1
                                                ENABLE_TIP_EVENTS  = 2

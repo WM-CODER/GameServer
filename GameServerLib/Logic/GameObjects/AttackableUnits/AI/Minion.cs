@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Numerics;
 using LeagueSandbox.GameServer.Logic.GameObjects.AttackableUnits;
+using LeagueSandbox.GameServer.Logic.GameObjects.Stats;
 
 namespace LeagueSandbox.GameServer.Logic.GameObjects
 {
@@ -21,6 +22,7 @@ namespace LeagueSandbox.GameServer.Logic.GameObjects
         MINION_TYPE_CANNON = 0x02,
         MINION_TYPE_SUPER = 0x01
     };
+
     public class Minion : ObjAIBase
     {
         /// <summary>
@@ -31,23 +33,25 @@ namespace LeagueSandbox.GameServer.Logic.GameObjects
         public MinionSpawnPosition SpawnPosition { get; private set; }
         protected MinionSpawnType minionType;
         protected bool _AIPaused;
+        public MinionStats Stats;
 
         public Minion(
             MinionSpawnType type,
             MinionSpawnPosition position,
             List<Vector2> mainWaypoints,
             uint netId = 0
-        ) : base("", new MinionStats(), 40, 0, 0, 1100, netId)
+        ) : base("", 40, 0, 0, 1100, netId)
         {
             minionType = type;
             SpawnPosition = position;
             this.mainWaypoints = mainWaypoints;
             curMainWaypoint = 0;
             _AIPaused = false;
+            Stats = new MinionStats(this);
 
             var spawnSpecifics = _game.Map.MapGameScript.GetMinionSpawnPosition(SpawnPosition);
             SetTeam(spawnSpecifics.Item1);
-            setPosition(spawnSpecifics.Item2.X, spawnSpecifics.Item2.Y);
+            SetPosition(spawnSpecifics.Item2.X, spawnSpecifics.Item2.Y);
 
             _game.Map.MapGameScript.SetMinionStats(this); // Let the map decide how strong this minion has to be.
 
@@ -79,6 +83,40 @@ namespace LeagueSandbox.GameServer.Logic.GameObjects
         ) : this(type, position, new List<Vector2>(), netId)
         {
 
+        }
+
+        public override void UpdateReplication()
+        {
+            ReplicationManager.Update(Stats.CurrentHealth, 1, 0);
+            ReplicationManager.Update(Stats.MaxHealth, 1, 1);
+            ReplicationManager.Update(Stats.LifeTime, 1, 2);
+            ReplicationManager.Update(Stats.MaxLifeTime, 1, 3);
+            ReplicationManager.Update(Stats.LifeTimeTicks, 1, 4);
+            ReplicationManager.Update((uint)Stats.ActionState, 1, 6);
+            ReplicationManager.Update(Stats.MagicImmune, 1, 7);
+            ReplicationManager.Update(Stats.IsInvulnerable, 1, 8);
+            ReplicationManager.Update(Stats.IsPhysicalImmune, 1, 9);
+            ReplicationManager.Update(Stats.IsLifestealImmune, 1, 10);
+            ReplicationManager.Update(Stats.BaseAttackDamage, 1, 11);
+            ReplicationManager.Update(Stats.TotalArmor, 1, 12);
+            ReplicationManager.Update(Stats.SpellBlock, 1, 13);
+            ReplicationManager.Update(Stats.AttackSpeedMod, 1, 14);
+            ReplicationManager.Update(Stats.FlatPhysicalDamageMod, 1, 15);
+            ReplicationManager.Update(Stats.PercentPhysicalDamageMod, 1, 16);
+            ReplicationManager.Update(Stats.FlatMagicalDamageMod, 1, 17);
+            ReplicationManager.Update(Stats.PercentMagicalDamageMod, 1, 18);
+            ReplicationManager.Update(Stats.HealthRegenRate, 1, 19);
+            ReplicationManager.Update(Stats.ManaRegenRate, 1, 20);
+            ReplicationManager.Update(Stats.ManaRegenRate2, 1, 21);
+            ReplicationManager.Update(Stats.FlatMagicReduction, 1, 22);
+            ReplicationManager.Update(Stats.PercentMagicReduction, 1, 23);
+            ReplicationManager.Update(Stats.CurrentMana, 3, 0);
+            ReplicationManager.Update(Stats.FlatVisionRadiusMod, 3, 1);
+            ReplicationManager.Update(Stats.PercentVisionRadiusMod, 3, 2);
+            ReplicationManager.Update(Stats.TotalMovementSpeed, 3, 3);
+            ReplicationManager.Update(Stats.TotalCriticalChance, 3, 4);
+            ReplicationManager.Update(Stats.IsTargetable, 3, 5);
+            ReplicationManager.Update((uint)Stats.IsTargetableToTeamFlags, 3, 6);
         }
 
         public MinionSpawnType getType()
@@ -183,7 +221,7 @@ namespace LeagueSandbox.GameServer.Logic.GameObjects
         }
         protected void keepFocussingTarget()
         {
-            if (IsAttacking && (TargetUnit == null || GetDistanceTo(TargetUnit) > _stats.Range.Total))
+            if (IsAttacking && (TargetUnit == null || GetDistanceTo(TargetUnit) > AttackRange.Total))
             // If target is dead or out of range
             {
                 _game.PacketNotifier.NotifyStopAutoAttack(this);

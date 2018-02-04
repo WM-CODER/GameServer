@@ -11,7 +11,7 @@ namespace LeagueSandbox.GameServer.Logic.Packets.PacketDefinitions.S2C
         {
             buffer.Write((byte)capturePointId);
             buffer.Write(unit.NetId);
-            buffer.fill(0, 6);
+            buffer.Fill(0, 6);
         }
     }
 }

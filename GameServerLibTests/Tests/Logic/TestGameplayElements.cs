@@ -27,7 +27,7 @@ namespace LeagueSandbox.GameServerTests.Tests
             // champ.setPosition(200, 200);
 
             // wait until both are colliding, then:
-            // Assert.IsTrue(projectile.isToRemove());
+            // Assert.IsTrue(projectile.IsToRemove());
         }
     }
 }

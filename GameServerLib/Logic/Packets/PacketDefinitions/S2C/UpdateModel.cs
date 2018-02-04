@@ -17,7 +17,7 @@ namespace LeagueSandbox.GameServer.Logic.Packets.PacketDefinitions.S2C
             foreach (var b in Encoding.Default.GetBytes(modelName))
                 buffer.Write((byte)b);
             if (modelName.Length < 32)
-                buffer.fill(0, 32 - modelName.Length);
+                buffer.Fill(0, 32 - modelName.Length);
         }
     }
 }

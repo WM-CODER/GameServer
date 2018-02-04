@@ -38,7 +38,7 @@ namespace LeagueSandbox.GameServer
             list.AddRange(Encoding.BigEndianUnicode.GetBytes(val));
         }
 
-        public static void fill(this BinaryWriter list, byte data, int length)
+        public static void Fill(this BinaryWriter list, byte data, int length)
         {
             for (var i = 0; i < length; ++i)
             {

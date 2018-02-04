@@ -12,7 +12,7 @@ namespace LeagueSandbox.GameServer.Logic.Packets.PacketDefinitions.S2C
             buffer.Write((float)z);
             buffer.Write((float)y);
             buffer.Write(Encoding.Default.GetBytes(iconName));
-            buffer.fill(0, 64 - iconName.Length);
+            buffer.Fill(0, 64 - iconName.Length);
             buffer.Write((byte)campId);
             buffer.Write((byte)campUnk);
 
@@ -21,7 +21,7 @@ namespace LeagueSandbox.GameServer.Logic.Packets.PacketDefinitions.S2C
             buffer.Write((byte)0xFB); //   |-> Unk
             buffer.Write((byte)0x41); //   |
             buffer.Write((byte)0x0C); // <-|*/
-            buffer.fill(0, 5);
+            buffer.Fill(0, 5);
             buffer.Write((float)unk);
         }
     }

@@ -28,7 +28,7 @@ namespace LeagueSandbox.GameServer.Logic.Packets.PacketDefinitions.S2C
             buffer.Write((float)p.GetZ()); //z
             buffer.Write((float)p.Y); //y
 
-            buffer.fill(0, 8);
+            buffer.Fill(0, 8);
 
             buffer.Write((short)p.Team);
             buffer.Write((byte)0x92);
@@ -43,18 +43,18 @@ namespace LeagueSandbox.GameServer.Logic.Packets.PacketDefinitions.S2C
             buffer.Write((byte)0x00);
 
             buffer.Write(Encoding.Default.GetBytes(p.Name));
-            buffer.fill(0, 64 - p.Name.Length);
+            buffer.Fill(0, 64 - p.Name.Length);
 
             buffer.Write(Encoding.Default.GetBytes(p.Model));
-            buffer.fill(0, 64 - p.Model.Length);
+            buffer.Fill(0, 64 - p.Model.Length);
 
             buffer.Write((byte)0x01);
 
-            buffer.fill(0, 16);
+            buffer.Fill(0, 16);
 
             buffer.Write((float)1.0f); // Unk
 
-            buffer.fill(0, 13);
+            buffer.Fill(0, 13);
 
             buffer.Write((byte)0x03);
 

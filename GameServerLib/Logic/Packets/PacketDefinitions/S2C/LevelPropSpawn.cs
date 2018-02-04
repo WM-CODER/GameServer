@@ -34,10 +34,10 @@ namespace LeagueSandbox.GameServer.Logic.Packets.PacketDefinitions.S2C
 
             foreach (var b in Encoding.Default.GetBytes(lp.Name))
                 buffer.Write((byte)b);
-            buffer.fill(0, 64 - lp.Name.Length);
+            buffer.Fill(0, 64 - lp.Name.Length);
             foreach (var b in Encoding.Default.GetBytes(lp.Model))
                 buffer.Write(b);
-            buffer.fill(0, 64 - lp.Model.Length);
+            buffer.Fill(0, 64 - lp.Model.Length);
         }
     }
 }

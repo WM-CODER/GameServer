@@ -33,10 +33,10 @@ namespace LeagueSandbox.GameServer.Logic.Packets.PacketDefinitions.S2C
             buffer.Write((float)p.GetZ());
             buffer.Write((float)p.Y);
             buffer.Write((int)0); // Unk ((float)castDelay ?)
-            buffer.Write((float)p.GetMoveSpeed()); // Projectile speed
+            buffer.Write((float)p.ProjectileSpeed);
             buffer.Write((int)0); // Unk
             buffer.Write((int)0); // Unk
-            buffer.Write((int)0x7f7fffff); // Unk
+            buffer.Write((int)0x7F7FFFFF); // Unk
             buffer.Write((byte)0); // Unk
             if (!p.Target.IsSimpleTarget)
             {
